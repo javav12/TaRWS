@@ -41,41 +41,48 @@ The program collects system sensor data and generates a `log.txt` file automatic
 
 ### 1. Clone the repo
 
-```bash
+```
 git clone https://github.com/javav12/TaRWS
 cd TaRWS
+```
 
 2. Install dependencies
-
+```
 pip install -r requirements.txt
-
+```
 Or manually install:
-
+```
 psutil
 matplotlib
+```
 
 🖥️ Usage
 ▶ Run with default Matplotlib GUI
-
+```
 python TaRWS.py
+```
 
 Shows real-time CPU temp & RPM graph.
+
 🟩 ASCII Mode (Terminal Graph)
-
+```
 python TaRWS.py --ASCII_Graphics
-
+```
 Options:
-
+```
 --interval N      Data refresh interval (seconds)
 --smooth N        ASCII smoothing window size
+```
 
 Example:
+```
 python TaRWS.py --ASCII_Graphics --interval 0.5 --smooth 3
+```
 
 ⚪ No Graphics Mode (Just Logging)
-
+```
 python TaRWS.py --No_Graphics
-
+```
 Runs silently, displays basic values and writes log on exit.
 📄 Log File
 
@@ -84,18 +91,21 @@ On exit, the program automatically creates:
 log.txt
 
 Format:
-
+```
 time,temp,rpm
 0.0,45.0,1000
 1.0,46.0,1020
 ...
+```
 
 ⚙ Command Line Arguments
 Argument Description
+```
 --No_Graphics Disable all graphics, only print values + log
 --ASCII_Graphics Enable ASCII graph mode
 --interval N Set data polling frequency (seconds)
 --smooth N ASCII graph smoothing window
+```
 📌 Notes
 
     Fan RPM will show N/A on systems without fan sensors (Intel iGPU, passive cooling, etc.)
