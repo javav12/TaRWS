@@ -3,3 +3,5 @@ add log.json support
 add difrent matolib gui modes
 make code moduler and easy to read 
 add req.txt 
+add windows support
+read gpu temp and rpm
