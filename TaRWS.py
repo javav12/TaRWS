@@ -1,3 +1,13 @@
+
+
+#  _____    ______ _    _ _____ 
+# |_   _|   | ___ \ |  | /  ___|
+#   | | __ _| |_/ / |  | \ `--. 
+#   | |/ _` |    /| |/\| |`--. \
+#   | | (_| | |\ \\  /\  /\__/ /
+#   \_/\__,_\_| \_|\/  \/\____/ 
+
+
 import argparse
 import psutil
 import time
@@ -12,7 +22,7 @@ temps = []
 rpms = []
 times = []
 
-# ---- LOG SISTEMI ----
+# ---- LOG SYSTEM ----
 def save_log():
     with open("log.txt", "w") as f:
         f.write("time,temp,rpm\n")
@@ -25,7 +35,7 @@ atexit.register(save_log)
 # ----------------------
 
 def get_data():
-    # CPU Sıcaklığı
+    # CPU TEMP
     t = psutil.sensors_temperatures()
     cpu_temp = None
     if "coretemp" in t:
@@ -44,7 +54,7 @@ def get_data():
 
     return cpu_temp, fan_rpm
 
-# ---- ASCII GRAFIK ----
+# ---- ASCII GRAPHICS ----
 def draw_ascii_graph(data, width=80, height=20, smooth_window=3):
     if not data:
         return
@@ -76,16 +86,16 @@ def draw_ascii_graph(data, width=80, height=20, smooth_window=3):
 # ---- ARGPARSE ----
 parser = argparse.ArgumentParser()
 parser.add_argument("--nographics", action="store_true",
-                    help="ASCII modunda çalıştır")
+                    help="Run on ASCII mode")
 parser.add_argument("--interval", type=float, default=1.0,
-                    help="Veri toplama ve ASCII güncelleme aralığı (saniye)")
+                    help="Data collection time (sec)")
 parser.add_argument("--smooth", type=int, default=3,
-                    help="ASCII grafikte smoothing window boyutu")
+                    help="ASCII smoothing window size")
 args = parser.parse_args()
 
-# ---- ASCII MOD ----
+# ---- ASCII MODE ----
 if args.nographics:
-    print(f"[ASCII MODE] CTRL+C ile çıkabilirsin... (interval={args.interval}s, smoothing={args.smooth})\n")
+    print(f"[ASCII MODE]Press CTRL+C to Exit... (interval={args.interval}s, smoothing={args.smooth})\n")
     start = time.time()
     while True:
         try:
@@ -98,11 +108,11 @@ if args.nographics:
 
             os.system("clear")
 
-            # CPU Sıcaklığı ASCII grafiği
-            print("\033[92mCPU Sıcaklık (°C):", temp, "\033[0m")
+            # CPU TEMP ASCII 
+            print("\033[92mCPU TEMP (°C):", temp, "\033[0m")
             draw_ascii_graph(temps[-60:], width=60, height=15, smooth_window=args.smooth)
 
-            # Fan RPM varsa ASCII grafiği
+            # Fan RPM (If we can get info) ASCII 
             if any(rpms):
                 print("\033[94mFan RPM:\033[0m")
                 draw_ascii_graph([v if v is not None else 0 for v in rpms[-60:]],
@@ -112,16 +122,16 @@ if args.nographics:
             time.sleep(args.interval)
 
         except KeyboardInterrupt:
-            print("\nÇıkılıyor...")
+            print("\nExiting...")
             break
 
     exit()
 
-# ---- MATPLOTLIB GRAFIK MODU ----
+# ---- MATPLOTLIB GRAPHICS MODE ----
 fig, ax = plt.subplots()
-ax.set_xlabel("Zaman (sn)")
-ax.set_ylabel("Değer")
-ax.set_title("CPU Sıcaklık & Fan RPM")
+ax.set_xlabel("TIME (sn)")
+ax.set_ylabel("VAL")
+ax.set_title("CPU TEMP & Fan RPM")
 
 cpu_line, = ax.plot([], [], color="green", marker="o", label="CPU (°C)")
 rpm_line, = ax.plot([], [], color="blue", marker="x", label="Fan RPM")
@@ -134,7 +144,7 @@ def animate(i):
 
     cpu_line.set_data(times, temps)
 
-    # RPM varsa çiz
+    # RPM 
     if any(rpms):
         rpm_vals = [v if v is not None else 0 for v in rpms]
         rpm_line.set_data(times, rpm_vals)
