@@ -6,8 +6,9 @@
 #   | |/ _` |    /| |/\| |`--. \
 #   | | (_| | |\ \\  /\  /\__/ /
 #   \_/\__,_\_| \_|\/  \/\____/ 
+# maded by cows for everone
 
-
+#Imports
 import argparse
 import psutil
 import time
@@ -18,6 +19,7 @@ import matplotlib.animation as animation
 import sys
 import shutil
 
+#dics
 temps = []
 rpms = []
 times = []
@@ -44,6 +46,7 @@ def get_data():
         for v in t.values():
             cpu_temp = v[0].current
             break
+    
 
     # Fan RPM
     f = psutil.sensors_fans()
@@ -85,16 +88,18 @@ def draw_ascii_graph(data, width=80, height=20, smooth_window=3):
 
 # ---- ARGPARSE ----
 parser = argparse.ArgumentParser()
-parser.add_argument("--nographics", action="store_true",
+parser.add_argument("--No_Graphics",action="store_true",
+                    help="No Graphics are drawed just log (when program ended)")
+parser.add_argument("--ASCII_Graphics", action="store_true",
                     help="Run on ASCII mode")
 parser.add_argument("--interval", type=float, default=1.0,
                     help="Data collection time (sec)")
-parser.add_argument("--smooth", type=int, default=3,
+parser.add_argument("--smooth", type=int, default=5,
                     help="ASCII smoothing window size")
 args = parser.parse_args()
 
 # ---- ASCII MODE ----
-if args.nographics:
+if args.ASCII_Graphics:
     print(f"[ASCII MODE]Press CTRL+C to Exit... (interval={args.interval}s, smoothing={args.smooth})\n")
     start = time.time()
     while True:
@@ -118,7 +123,7 @@ if args.nographics:
                 draw_ascii_graph([v if v is not None else 0 for v in rpms[-60:]],
                                  width=60, height=5, smooth_window=args.smooth)
 
-            print("\nZaman: {:.1f} sn".format(t))
+            print("\Time: {:.1f} sn".format(t))
             time.sleep(args.interval)
 
         except KeyboardInterrupt:
@@ -126,33 +131,63 @@ if args.nographics:
             break
 
     exit()
+# ---- NO GRAPHICS MODE ----
+if args.No_Graphics:
+    start = time.time()
+    print("NO Graphics mode CTRL C For EXIT...")
+    while True:
+        try:
+            temp, rpm = get_data()
+            t = time.time() - start
+
+            times.append(t)
+            temps.append(temp)
+            rpms.append(rpm)
+
+            os.system("clear")
+
+            # CPU TEMP  
+            print("\033[92mCPU TEMP (°C):", temp, "\033[0m")
+           
+
+            # Fan RPM (If we can get info) 
+            if any(rpms):
+                print("\033[94mFan RPM:\033[0m")
+               
+            print("\Time: {:.1f} sn".format(t))
+            time.sleep(args.interval)
+
+        except KeyboardInterrupt:
+            print("\nExiting...")
+            break
 
 # ---- MATPLOTLIB GRAPHICS MODE ----
-fig, ax = plt.subplots()
-ax.set_xlabel("TIME (sn)")
-ax.set_ylabel("VAL")
-ax.set_title("CPU TEMP & Fan RPM")
+if not args.ASCII_Graphics and not args.No_Graphics:
+    fig, ax = plt.subplots()
+    ax.set_xlabel("TIME (sn)")
+    ax.set_ylabel("VAL")
+    ax.set_title("CPU TEMP & Fan RPM")
 
-cpu_line, = ax.plot([], [], color="green", marker="o", label="CPU (°C)")
-rpm_line, = ax.plot([], [], color="blue", marker="x", label="Fan RPM")
+    cpu_line, = ax.plot([], [], color="green", marker="o", label="CPU (°C)")
+    rpm_line, = ax.plot([], [], color="blue", marker="x", label="Fan RPM")
 
-def animate(i):
-    temp, rpm = get_data()
-    times.append(i)
-    temps.append(temp)
-    rpms.append(rpm)
+    def animate(i):
+        temp, rpm = get_data()
+        times.append(i)
+        temps.append(temp)
+        rpms.append(rpm)
 
-    cpu_line.set_data(times, temps)
+        cpu_line.set_data(times, temps)
 
-    # RPM 
-    if any(rpms):
-        rpm_vals = [v if v is not None else 0 for v in rpms]
-        rpm_line.set_data(times, rpm_vals)
+        # RPM 
+        if any(rpms):
+            rpm_vals = [v if v is not None else 0 for v in rpms]
+            rpm_line.set_data(times, rpm_vals)
 
-    ax.relim()
-    ax.autoscale_view()
-    ax.legend()
+        ax.relim()
+        ax.autoscale_view()
+        ax.legend()
 
-ani = animation.FuncAnimation(fig, animate, interval=1000*args.interval, cache_frame_data=False)
-plt.tight_layout()
-plt.show()
+    ani = animation.FuncAnimation(fig, animate, interval=1000*args.interval, cache_frame_data=False)
+    plt.tight_layout()
+    plt.show()
