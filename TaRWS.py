@@ -29,7 +29,7 @@ def save_log():
         for t, temp, rpm in zip(times, temps, rpms):
             rpm_val = rpm if rpm is not None else "N/A"
             f.write(f"{t},{temp},{rpm_val}\n")
-    print("\n[+] log.txt kaydedildi")
+    print("\n[+] log.txt saved")
 
 atexit.register(save_log)
 # ----------------------
